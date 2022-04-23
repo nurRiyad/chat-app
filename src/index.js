@@ -12,8 +12,22 @@ const publicDirectoryPath = path.join(__dirname, "../public");
 
 app.use(express.static(publicDirectoryPath));
 
-io.on("connection", () => {
-  console.log("New Web Socket Connection");
+io.on("connection", (socket) => {
+  socket.emit("welcome", "Welcome! you are connected through the socket.io");
+
+  socket.broadcast.emit("newMsg", "A new user joined the chat room");
+
+  socket.on("sendMsg", (msg) => {
+    io.emit("newMsg", msg);
+  });
+
+  socket.on("sendLocation", (msg) => {
+    io.emit("newMsg", msg);
+  });
+
+  socket.on("disconnect", () => {
+    io.emit("newMsg", "A user just left the chat room");
+  });
 });
 
 server.listen(port, () => {
