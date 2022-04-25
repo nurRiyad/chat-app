@@ -17,12 +17,14 @@ io.on("connection", (socket) => {
 
   socket.broadcast.emit("newMsg", "A new user joined the chat room");
 
-  socket.on("sendMsg", (msg) => {
+  socket.on("sendMsg", (msg, callback) => {
     io.emit("newMsg", msg);
+    callback();
   });
 
-  socket.on("sendLocation", (msg) => {
+  socket.on("sendLocation", (msg, callback) => {
     io.emit("newMsg", msg);
+    callback();
   });
 
   socket.on("disconnect", () => {
