@@ -9,7 +9,11 @@ const msg = document.querySelector("#msg");
 const lbtn = document.querySelector("#location");
 
 btn.addEventListener("click", (event) => {
+  btn.setAttribute("disabled", "disabled");
   socket.emit("sendMsg", msg.value, (error) => {
+    btn.removeAttribute("disabled");
+    msg.value = "";
+    msg.focus();
     if (error) {
       console.log(error);
     } else {
@@ -20,9 +24,11 @@ btn.addEventListener("click", (event) => {
 
 lbtn.addEventListener("click", (event) => {
   if (navigator.geolocation) {
+    lbtn.setAttribute("disabled", "disabled");
     navigator.geolocation.getCurrentPosition((position) => {
       const fdata = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
       socket.emit("sendLocation", fdata, (error) => {
+        lbtn.removeAttribute("disabled");
         if (error) {
           console.log(error);
         } else {
