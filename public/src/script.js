@@ -1,12 +1,11 @@
 const socket = io();
-
-socket.on("welcome", (msg) => {
-  console.log(msg);
-});
-
 const btn = document.querySelector("#send");
 const msg = document.querySelector("#msg");
 const lbtn = document.querySelector("#location");
+
+socket.on("newMsg", (msg) => {
+  console.log(msg);
+});
 
 btn.addEventListener("click", (event) => {
   btn.setAttribute("disabled", "disabled");
@@ -39,8 +38,4 @@ lbtn.addEventListener("click", (event) => {
   } else {
     alert("This browser doesn't support geo location");
   }
-});
-
-socket.on("newMsg", (msg) => {
-  console.log(msg);
 });

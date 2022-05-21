@@ -13,7 +13,7 @@ const publicDirectoryPath = path.join(__dirname, "../public");
 app.use(express.static(publicDirectoryPath));
 
 io.on("connection", (socket) => {
-  socket.emit("welcome", "Welcome! you are connected through the socket.io");
+  socket.emit("newMsg", "Welcome! you are connected through the socket.io");
 
   socket.broadcast.emit("newMsg", "A new user joined the chat room");
 
