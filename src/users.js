@@ -22,7 +22,6 @@ const addUser = ({ id, username, room }) => {
 
   const newUser = { id, username, room };
   users.push(newUser);
-  console.log("userList ->", users);
   return { user: newUser };
 };
 
@@ -43,8 +42,8 @@ const getUser = (id) => {
 };
 
 const getUserInRoom = (room) => {
-  return users.find((element) => {
-    element.room === room;
+  return users.filter((element) => {
+    return element.room === room;
   });
 };
 

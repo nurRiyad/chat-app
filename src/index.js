@@ -24,18 +24,19 @@ io.on("connection", (socket) => {
 
     socket.emit(
       "newMsg",
-      generateMsg(
-        "Welcome! you are connected through the socket.io",
-        user.username
-      )
+      generateMsg("Welcome! you are connected through the socket.io", "Admin")
     );
 
     socket.broadcast
       .to(user.room)
       .emit(
         "newMsg",
-        generateMsg(`${user.username} just joined the room`, user.username)
+        generateMsg(`${user.username} just joined the room`, "Admin")
       );
+    io.to(user.room).emit("roomData", {
+      room: user.room,
+      users: getUserInRoom(user.room),
+    });
 
     callback();
   });
@@ -58,8 +59,12 @@ io.on("connection", (socket) => {
     if (user) {
       io.to(user.room).emit(
         "newMsg",
-        generateMsg(`${user.username} just left the room`, user.username)
+        generateMsg(`${user.username} just left the room`, "Admin")
       );
+      io.to(user.room).emit("roomData", {
+        room: user.room,
+        users: getUserInRoom(user.room),
+      });
     }
   });
 });

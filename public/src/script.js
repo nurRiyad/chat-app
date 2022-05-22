@@ -5,10 +5,12 @@ const btn = document.querySelector("#send");
 const msg = document.querySelector("#msg");
 const lbtn = document.querySelector("#location");
 const msgRender = document.querySelector("#message");
+const sidebar = document.querySelector("#sidebar");
 
 //selecting html template to render
 const msgTemplae = document.querySelector("#message-templage").innerHTML;
 const linkTemplate = document.querySelector("#link-template").innerHTML;
+const sidebarTemplate = document.querySelector("#sidebar-template").innerHTML;
 
 //part the query params
 const { username, room } = Qs.parse(location.search, {
@@ -16,7 +18,6 @@ const { username, room } = Qs.parse(location.search, {
 });
 
 socket.on("newMsg", (msg) => {
-  console.log(msg);
   const html = Mustache.render(msgTemplae, {
     username: msg.username,
     msg: msg.msg,
@@ -26,13 +27,21 @@ socket.on("newMsg", (msg) => {
 });
 
 socket.on("locationMsg", (msg) => {
-  console.log(msg);
   const html = Mustache.render(linkTemplate, {
     username: msg.username,
     msg: msg.msg,
     createdAt: moment(msg.createdAt).format("h:mm a"),
   });
   msgRender.insertAdjacentHTML("beforeend", html);
+});
+
+socket.on("roomData", ({ users, room }) => {
+  console.log("Called->", users);
+  const html = Mustache.render(sidebarTemplate, {
+    room,
+    users,
+  });
+  sidebar.innerHTML = html;
 });
 
 btn.addEventListener("click", (event) => {
