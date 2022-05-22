@@ -17,6 +17,22 @@ const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true,
 });
 
+const autoScroll = () => {
+  const newMsg = msgRender.lastElementChild;
+
+  const newMsgStyle = getComputedStyle(newMsg);
+  const newMsgMargin = parseInt(newMsgStyle.marginBottom);
+  const newMsgHeight = newMsg.offsetHeight + newMsgMargin;
+
+  const visibleHeight = msgRender.offsetHeight;
+  const containerHeight = msgRender.scrollHeight;
+  const scrollOffset = msgRender.scrollTop + visibleHeight;
+
+  if (containerHeight - newMsgHeight <= scrollOffset) {
+    msgRender.scrollTop = msgRender.scrollHeight;
+  }
+};
+
 socket.on("newMsg", (msg) => {
   const html = Mustache.render(msgTemplae, {
     username: msg.username,
@@ -24,6 +40,7 @@ socket.on("newMsg", (msg) => {
     createdAt: moment(msg.createdAt).format("h.mm a"),
   });
   msgRender.insertAdjacentHTML("beforeend", html);
+  autoScroll();
 });
 
 socket.on("locationMsg", (msg) => {
@@ -33,10 +50,10 @@ socket.on("locationMsg", (msg) => {
     createdAt: moment(msg.createdAt).format("h:mm a"),
   });
   msgRender.insertAdjacentHTML("beforeend", html);
+  autoScroll();
 });
 
 socket.on("roomData", ({ users, room }) => {
-  console.log("Called->", users);
   const html = Mustache.render(sidebarTemplate, {
     room,
     users,
@@ -45,17 +62,20 @@ socket.on("roomData", ({ users, room }) => {
 });
 
 btn.addEventListener("click", (event) => {
-  btn.setAttribute("disabled", "disabled");
-  socket.emit("sendMsg", msg.value, (error) => {
-    btn.removeAttribute("disabled");
-    msg.value = "";
-    msg.focus();
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Message delivered");
-    }
-  });
+  if (msg.value) {
+    btn.setAttribute("disabled", "disabled");
+
+    socket.emit("sendMsg", msg.value, (error) => {
+      btn.removeAttribute("disabled");
+      msg.value = "";
+      msg.focus();
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Message delivered");
+      }
+    });
+  }
 });
 
 lbtn.addEventListener("click", (event) => {
