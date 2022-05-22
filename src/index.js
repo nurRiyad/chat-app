@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const socketio = require("socket.io");
+const { generateMsg } = require("./msg");
 
 const app = express();
 const server = http.createServer(app);
@@ -13,22 +14,28 @@ const publicDirectoryPath = path.join(__dirname, "../public");
 app.use(express.static(publicDirectoryPath));
 
 io.on("connection", (socket) => {
-  socket.emit("newMsg", "Welcome! you are connected through the socket.io");
+  socket.emit(
+    "newMsg",
+    generateMsg("Welcome! you are connected through the socket.io")
+  );
 
-  socket.broadcast.emit("newMsg", "A new user joined the chat room");
+  socket.broadcast.emit(
+    "newMsg",
+    generateMsg("A new user joined the chat room")
+  );
 
   socket.on("sendMsg", (msg, callback) => {
-    io.emit("newMsg", msg);
+    io.emit("newMsg", generateMsg(msg));
     callback();
   });
 
   socket.on("sendLocation", (msg, callback) => {
-    io.emit("newMsg", msg);
+    io.emit("locationMsg", generateMsg(msg));
     callback();
   });
 
   socket.on("disconnect", () => {
-    io.emit("newMsg", "A user just left the chat room");
+    io.emit("newMsg", generateMsg("A user just left the chat room"));
   });
 });
 

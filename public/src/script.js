@@ -2,9 +2,26 @@ const socket = io();
 const btn = document.querySelector("#send");
 const msg = document.querySelector("#msg");
 const lbtn = document.querySelector("#location");
+const msgTemplae = document.querySelector("#message-templage").innerHTML;
+const linkTemplate = document.querySelector("#link-template").innerHTML;
+const msgRender = document.querySelector("#message");
 
 socket.on("newMsg", (msg) => {
   console.log(msg);
+  const html = Mustache.render(msgTemplae, {
+    msg: msg.msg,
+    createdAt: moment(msg.createdAt).format("h.mm a"),
+  });
+  msgRender.insertAdjacentHTML("beforeend", html);
+});
+
+socket.on("locationMsg", (msg) => {
+  console.log(msg);
+  const html = Mustache.render(linkTemplate, {
+    msg: msg.msg,
+    createdAt: moment(msg.createdAt).format("h:mm a"),
+  });
+  msgRender.insertAdjacentHTML("beforeend", html);
 });
 
 btn.addEventListener("click", (event) => {
