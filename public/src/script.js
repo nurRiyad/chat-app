@@ -1,14 +1,24 @@
 const socket = io();
+
+//selecting dom element
 const btn = document.querySelector("#send");
 const msg = document.querySelector("#msg");
 const lbtn = document.querySelector("#location");
+const msgRender = document.querySelector("#message");
+
+//selecting html template to render
 const msgTemplae = document.querySelector("#message-templage").innerHTML;
 const linkTemplate = document.querySelector("#link-template").innerHTML;
-const msgRender = document.querySelector("#message");
+
+//part the query params
+const { username, room } = Qs.parse(location.search, {
+  ignoreQueryPrefix: true,
+});
 
 socket.on("newMsg", (msg) => {
   console.log(msg);
   const html = Mustache.render(msgTemplae, {
+    username: msg.username,
     msg: msg.msg,
     createdAt: moment(msg.createdAt).format("h.mm a"),
   });
@@ -18,6 +28,7 @@ socket.on("newMsg", (msg) => {
 socket.on("locationMsg", (msg) => {
   console.log(msg);
   const html = Mustache.render(linkTemplate, {
+    username: msg.username,
     msg: msg.msg,
     createdAt: moment(msg.createdAt).format("h:mm a"),
   });
@@ -54,5 +65,12 @@ lbtn.addEventListener("click", (event) => {
     });
   } else {
     alert("This browser doesn't support geo location");
+  }
+});
+
+socket.emit("join", { username, room }, (error) => {
+  if (error) {
+    alert(error);
+    location.href = "/";
   }
 });

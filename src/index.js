@@ -3,6 +3,7 @@ const path = require("path");
 const http = require("http");
 const socketio = require("socket.io");
 const { generateMsg } = require("./msg");
+const { addUser, removeUser, getUser, getUserInRoom } = require("./users");
 
 const app = express();
 const server = http.createServer(app);
@@ -14,28 +15,52 @@ const publicDirectoryPath = path.join(__dirname, "../public");
 app.use(express.static(publicDirectoryPath));
 
 io.on("connection", (socket) => {
-  socket.emit(
-    "newMsg",
-    generateMsg("Welcome! you are connected through the socket.io")
-  );
+  socket.on("join", ({ username, room }, callback) => {
+    const { error, user } = addUser({ id: socket.id, username, room });
+    if (error) {
+      return callback(error);
+    }
+    socket.join(user.room);
 
-  socket.broadcast.emit(
-    "newMsg",
-    generateMsg("A new user joined the chat room")
-  );
+    socket.emit(
+      "newMsg",
+      generateMsg(
+        "Welcome! you are connected through the socket.io",
+        user.username
+      )
+    );
+
+    socket.broadcast
+      .to(user.room)
+      .emit(
+        "newMsg",
+        generateMsg(`${user.username} just joined the room`, user.username)
+      );
+
+    callback();
+  });
 
   socket.on("sendMsg", (msg, callback) => {
-    io.emit("newMsg", generateMsg(msg));
+    const user = getUser(socket.id);
+
+    io.to(user.room).emit("newMsg", generateMsg(msg, user.username));
     callback();
   });
 
   socket.on("sendLocation", (msg, callback) => {
-    io.emit("locationMsg", generateMsg(msg));
+    const user = getUser(socket.id);
+    io.to(user.room).emit("locationMsg", generateMsg(msg, user.username));
     callback();
   });
 
   socket.on("disconnect", () => {
-    io.emit("newMsg", generateMsg("A user just left the chat room"));
+    const user = removeUser(socket.id);
+    if (user) {
+      io.to(user.room).emit(
+        "newMsg",
+        generateMsg(`${user.username} just left the room`, user.username)
+      );
+    }
   });
 });
 
