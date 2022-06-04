@@ -15,6 +15,7 @@ const publicDirectoryPath = path.join(__dirname, "../public");
 app.use(express.static(publicDirectoryPath));
 
 io.on("connection", (socket) => {
+  //when a user join a specific room
   socket.on("join", ({ username, room }, callback) => {
     const { error, user } = addUser({ id: socket.id, username, room });
     if (error) {
@@ -41,6 +42,7 @@ io.on("connection", (socket) => {
     callback();
   });
 
+  // sending message from server to client
   socket.on("sendMsg", (msg, callback) => {
     const user = getUser(socket.id);
 
@@ -48,12 +50,14 @@ io.on("connection", (socket) => {
     callback();
   });
 
+  // Sending location from server to client
   socket.on("sendLocation", (msg, callback) => {
     const user = getUser(socket.id);
     io.to(user.room).emit("locationMsg", generateMsg(msg, user.username));
     callback();
   });
 
+  // Sending information when a user leave or disconnect from the room
   socket.on("disconnect", () => {
     const user = removeUser(socket.id);
     if (user) {
