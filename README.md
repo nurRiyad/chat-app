@@ -1,6 +1,6 @@
 # Chat App With Socket IO and Express
 
-A real time & bidirectional web application to Socket.io & Express js
+A real time & bidirectional communication web application with Socket.io & Express js
 
 ## Features
 
